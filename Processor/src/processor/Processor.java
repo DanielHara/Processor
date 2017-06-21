@@ -32,10 +32,13 @@ class ReorderBuffer{
 
 public class Processor {
     
-    private RegisterStatus registerStatus[] = new RegisterStatus[32];
+    private int N_RegisterStatus = 32;
+    private int N_ReservationStation = 12;
+    
+    private RegisterStatus registerStatus[] = new RegisterStatus[N_RegisterStatus];
     private Vector<Command> commands;
     private Vector<ReorderBuffer> ro;
-    private ReservationStation reservationStations[] = new ReservationStation[12];
+    private ReservationStation reservationStations[] = new ReservationStation[N_ReservationStation];
     
     private void readFile(){
         
@@ -53,6 +56,43 @@ public class Processor {
     
     public Processor(){
         readFile();
+    }
+    
+    public void issue (Command New_Instruction, int Instruction_index)
+    {
+        int i;
+        for (i = 0; i < N_ReservationStation; i++)
+            if (!reservationStations[i].busy)
+                break;
+        
+        if (i < N_ReservationStation)    //Existe uma estação de reserva vazia.
+        {
+            reservationStations[i].busy = true;
+            New_Instruction.T_Dest = i;
+            if (New_Instruction.isR())
+            {
+                reservationStations[i].qj = FindCorrespondingSource(New_Instruction.rs, Instruction_index);
+                reservationStations[i].qk = FindCorrespondingSource(New_Instruction.rt, Instruction_index);
+            }
+            
+            if (New_Instruction.isI())
+            {
+                reservationStations[i].qj = FindCorrespondingSource(New_Instruction.rd, Instruction_index);
+            }
+            
+        }
+       
+    }
+    
+    //Percorre todos os índices de 0 a Instruction_index - 1, procurando a instrução com maior índice
+    //de modo que Source_Register seja o registrador de destino, e retorna o índice da estação de reserva
+    //correspondente.
+    public int FindCorrespondingSource (int Source_Register, int Instruction_index)
+    {
+        for (int i = Instruction_index - 1; i >= 0; i++)
+            if (commands.get(i).rd == Source_Register)
+                return commands.get(i).T_Dest;
+        return Source_Register;    
     }
     
     public void nextClock(){
