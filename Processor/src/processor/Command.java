@@ -6,8 +6,9 @@ enum CommandType{
     R,I,J
 }
 
-public class Command {
-    
+public class Command    //Command é como se fosse "Instruction". O vetor de Command denominado commands[]
+                        //deve conter todas as intruções.
+{
     private static AbstractMap<String,Operation> operationMap;
     
     public Operation op;
@@ -18,6 +19,8 @@ public class Command {
     public int immediate;
     public int targetAddress;
     public CommandType commandType;
+    
+    public int T_Dest;     //T_Dest é o registrador de destino no Tomasulo.
     
     public static void setMap(){
         operationMap.put("100000", Operation.ADD);
@@ -82,4 +85,20 @@ public class Command {
         }
         return com;
     }
+    
+    public boolean isR ()
+    {
+        return (commandType == CommandType.R);
+    }
+    
+    public boolean isI ()
+    {
+        return (commandType == CommandType.I);
+    }
+    
+    public boolean isJ ()
+    {
+        return (commandType == CommandType.J);
+    }
+    
 }
